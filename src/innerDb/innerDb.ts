@@ -32,8 +32,17 @@ export class InMemoryMapDB {
     collection!.set(id, record);
     return id;
   }
-  findById(collectionName: string, id: string): CollectionTypes | null {
-    return this.collections.get(collectionName)?.get(id) || null;
+  findById(
+    collectionName: string,
+    id: string,
+    callbackErr: (err: string) => void,
+  ): CollectionTypes | null {
+    const getCollection = this.collections.get(collectionName)?.get(id) || null;
+    if (getCollection !== null) {
+      return getCollection;
+    } else {
+      callbackErr('User is not found, try again');
+    }
   }
   getAll(collectionName: string) {
     const collection = this.collections.get(collectionName);
