@@ -1,12 +1,9 @@
 import { Module } from '@nestjs/common';
-import { UserController } from './controllers/users.controller';
-import { UserService } from './services/users.service';
-import { TrackService } from './services/track.service';
-import { TrackController } from './controllers/track.controller';
+import { UserModule } from './user/user.module';
+import { TrackModule } from './track/track.module';
+import { InMemoryMapDB } from './innerDb/innerDb';
 
 @Module({
-  imports: [],
-  controllers: [UserController, TrackController],
-  providers: [UserService, TrackService],
+  imports: [InMemoryMapDB, UserModule, TrackModule],
 })
 export class AppModule {}

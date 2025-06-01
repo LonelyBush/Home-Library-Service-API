@@ -1,35 +1,20 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { CreateTrackDto } from './dto/create-track.dto';
+import { UpdateTrackDto } from './dto/update-track.dto';
 import { randomUUID } from 'crypto';
-import { CollectionTypes } from 'src/innerDb/innerDb';
-import { Track } from 'src/interfaces/interfaces';
-import { initDb } from 'src/main';
-import { CreateTrackDto, UpdateTrackDto } from 'src/shemas/track.dto';
 import { isValidUUID } from 'src/utils/validateUUID';
+import { Track } from './entities/track.entity';
+import { InMemoryMapDB } from 'src/innerDb/innerDb';
 
 @Injectable()
 export class TrackService {
-  getTracks(): CollectionTypes[] {
-    return initDb.getAll('Tracks');
-  }
-  getById(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    } else {
-      return initDb.findById('Tracks', id, () => {
-        //error callback
-        throw new NotFoundException('Not found', {
-          description: 'Track is not found, try again',
-        });
-      });
-    }
-  }
-  createPost(createTrackDto: CreateTrackDto) {
+  constructor(@Inject('DATABASE') private readonly db: InMemoryMapDB) {}
+  create(createTrackDto: CreateTrackDto) {
     const { name, duration, artistId, albumId } = createTrackDto;
     const createId = randomUUID();
     if (!name || !duration) {
@@ -37,7 +22,7 @@ export class TrackService {
         description: 'Check your body request, and try again',
       });
     } else {
-      return initDb.insert<Track>(
+      return this.db.insert<Track>(
         'Tracks',
         {
           name,
@@ -51,14 +36,33 @@ export class TrackService {
     }
   }
 
-  updateTrack(updateTrackDto: UpdateTrackDto, id: string) {
+  findAll() {
+    return this.db.getAll('Tracks');
+  }
+
+  findOne(id: string) {
+    if (!isValidUUID(id)) {
+      throw new BadRequestException('Bad ID', {
+        description: 'Wrong id type, check request url and try again',
+      });
+    } else {
+      return this.db.findById('Tracks', id, () => {
+        //error callback
+        throw new NotFoundException('Not found', {
+          description: 'Track is not found, try again',
+        });
+      });
+    }
+  }
+
+  update(id: string, updateTrackDto: UpdateTrackDto) {
     if (!isValidUUID(id)) {
       throw new BadRequestException('Bad ID', {
         description: 'Wrong id type, check request url and try again',
       });
     }
 
-    return initDb.update(
+    return this.db.update(
       'Tracks',
       id,
       (oldData) => {
@@ -75,19 +79,19 @@ export class TrackService {
     );
   }
 
-  delete(id: string) {
+  remove(id: string) {
     if (!isValidUUID(id)) {
       throw new BadRequestException('Bad ID', {
         description: 'Wrong id type, check request url and try again',
       });
     }
-    const findTrack = initDb.findById('Tracks', id, () => {
+    const findTrack = this.db.findById('Tracks', id, () => {
       throw new NotFoundException('Not found', {
         description: 'Track is not found, try again',
       });
     }) as Track;
     if (findTrack) {
-      initDb.delete('Tracks', findTrack.id);
+      this.db.delete('Tracks', findTrack.id);
       return `Track: ${findTrack.name} is succesfully deleted.`;
     }
   }

@@ -1,6 +1,7 @@
-import { Album, Favorites, Track, User } from 'src/interfaces/interfaces';
+import { Track } from 'src/track/entities/track.entity';
+import { User } from 'src/user/entities/user.entity';
 
-export type CollectionTypes = (User | Album | Favorites | Track) & {
+export type CollectionTypes = (User | Track) & {
   id?: string;
 };
 
