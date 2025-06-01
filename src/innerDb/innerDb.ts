@@ -1,6 +1,6 @@
-import { Album, Favorites, User } from 'src/interfaces/interfaces';
+import { Album, Favorites, Track, User } from 'src/interfaces/interfaces';
 
-export type CollectionTypes = (User | Album | Favorites) & {
+export type CollectionTypes = (User | Album | Favorites | Track) & {
   id?: string;
 };
 

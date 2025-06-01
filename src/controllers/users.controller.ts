@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { CollectionTypes } from 'src/innerDb/innerDb';
 import { CreateUserDto, UpdatePasswordDto } from 'src/shemas/user.dto';
-import { UserService } from 'src/services/user.service';
+import { UserService } from 'src/services/users.service';
 
 @Controller('user')
 export class UserController {
@@ -21,7 +21,7 @@ export class UserController {
     return this.userService.getAll();
   }
   @Get(':id')
-  getSpecificUser(@Param('id') id: string): CollectionTypes {
+  getById(@Param('id') id: string): CollectionTypes {
     return this.userService.getById(id);
   }
 
