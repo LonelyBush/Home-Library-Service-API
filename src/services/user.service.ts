@@ -22,10 +22,10 @@ export class UserService {
         description: 'Wrong id type, check request url and try again',
       });
     } else {
-      return initDb.findById('Users', id, (err) => {
+      return initDb.findById('Users', id, () => {
         //error callback
         throw new NotFoundException('Not found', {
-          description: err,
+          description: 'User is not found, try again',
         });
       });
     }
@@ -62,21 +62,32 @@ export class UserService {
         description: 'Wrong id type, check request url and try again',
       });
     }
-    const findUser = initDb.findById('Users', id, (err) => {
-      throw new NotFoundException('Not found', {
-        description: err,
-      });
-    }) as User;
 
-    const isValidPassword = oldPassword === findUser.password;
-
-    if (isValidPassword) {
-      initDb.update('Users', id, { ...findUser, password: newPassword });
-    } else {
-      throw new ForbiddenException('Wrong password', {
-        description: 'Old password is wrong !',
-      });
-    }
+    const isoData = new Date().toISOString();
+    return initDb.update(
+      'Users',
+      id,
+      (oldData) => {
+        const data = oldData as User;
+        if (data.password === oldPassword) {
+          return {
+            ...oldData,
+            password: newPassword,
+            version: data.version + 1,
+            updatedAt: isoData,
+          };
+        } else {
+          throw new ForbiddenException('Wrong password', {
+            description: 'Old password is wrong !',
+          });
+        }
+      },
+      () => {
+        throw new NotFoundException('Not found', {
+          description: 'User is not found, try again',
+        });
+      },
+    );
   }
 
   delete(id: string) {
@@ -85,13 +96,14 @@ export class UserService {
         description: 'Wrong id type, check request url and try again',
       });
     }
-    const findUser = initDb.findById('Users', id, (err) => {
+    const findUser = initDb.findById('Users', id, () => {
       throw new NotFoundException('Not found', {
-        description: err,
+        description: 'User is not found, try again',
       });
     }) as User;
     if (findUser) {
       initDb.delete('Users', findUser.id);
+      return `User: ${findUser.login} is succesfully deleted.`;
     }
   }
 }

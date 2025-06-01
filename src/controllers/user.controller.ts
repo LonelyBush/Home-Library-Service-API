@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Put,
@@ -29,7 +30,7 @@ export class UserController {
     return this.userService.createPost(createUserDto);
   }
 
-  @Put('id')
+  @Put(':id')
   update(
     @Body() updateUserPasswordDto: UpdatePasswordDto,
     @Param('id') id: string,
@@ -37,7 +38,8 @@ export class UserController {
     return this.userService.updatePassword(updateUserPasswordDto, id);
   }
 
-  @Delete('id')
+  @Delete(':id')
+  @HttpCode(204)
   delete(@Param('id') id: string) {
     return this.userService.delete(id);
   }

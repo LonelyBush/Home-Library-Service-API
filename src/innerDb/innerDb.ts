@@ -21,7 +21,7 @@ export class InMemoryMapDB {
     collectionName: string,
     data: T,
     id: string,
-  ): string {
+  ): CollectionTypes {
     if (!this.collections.has(collectionName)) {
       this.createCollection(collectionName);
     }
@@ -30,18 +30,18 @@ export class InMemoryMapDB {
     const record = { ...data, id };
 
     collection!.set(id, record);
-    return id;
+    return this.collections.get(collectionName).get(id);
   }
   findById(
     collectionName: string,
     id: string,
-    callbackErr: (err: string) => void,
+    callbackErr: () => void,
   ): CollectionTypes | null {
     const getCollection = this.collections.get(collectionName)?.get(id) || null;
     if (getCollection !== null) {
       return getCollection;
     } else {
-      callbackErr('User is not found, try again');
+      callbackErr();
     }
   }
   getAll(collectionName: string) {
@@ -51,14 +51,16 @@ export class InMemoryMapDB {
   update<T extends CollectionTypes>(
     collectionName: string,
     id: string,
-    newData: Partial<T>,
+    transformData: (data: CollectionTypes) => Partial<T>,
+    errCallback: () => void,
   ) {
     const collection = this.collections.get(collectionName);
-    if (!collection?.has(id)) return false;
+    if (!collection?.has(id)) return errCallback();
 
     const oldData = collection.get(id);
-    collection.set(id, { ...oldData, ...newData } as T);
-    return true;
+    const newData = transformData(oldData);
+    collection.set(id, { ...newData } as T);
+    return this.collections.get(collectionName).get(id);
   }
 
   find<T extends CollectionTypes>(
