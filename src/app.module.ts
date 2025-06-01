@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { TrackModule } from './track/track.module';
-import { InMemoryMapDB } from './innerDb/innerDb';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
-  imports: [InMemoryMapDB, UserModule, TrackModule],
+  imports: [DatabaseModule, UserModule, TrackModule],
 })
 export class AppModule {}

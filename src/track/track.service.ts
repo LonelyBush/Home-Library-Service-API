@@ -56,19 +56,33 @@ export class TrackService {
   }
 
   update(id: string, updateTrackDto: UpdateTrackDto) {
+    const { name, duration, albumId, artistId } = updateTrackDto;
     if (!isValidUUID(id)) {
       throw new BadRequestException('Bad ID', {
         description: 'Wrong id type, check request url and try again',
       });
     }
+    if (
+      typeof name !== 'string' ||
+      typeof albumId !== 'string' ||
+      typeof artistId !== 'string' ||
+      typeof duration !== 'number'
+    ) {
+      throw new BadRequestException('Bad Body', {
+        description: 'Wrong body request, check request body and try again',
+      });
+    }
 
-    return this.db.update(
+    const updatedTrack = this.db.update(
       'Tracks',
       id,
       (oldData) => {
         return {
           ...oldData,
-          ...updateTrackDto,
+          name,
+          duration,
+          albumId: albumId ?? null,
+          artistId: artistId ?? null,
         };
       },
       () => {
@@ -77,6 +91,7 @@ export class TrackService {
         });
       },
     );
+    return updatedTrack;
   }
 
   remove(id: string) {
@@ -92,7 +107,7 @@ export class TrackService {
     }) as Track;
     if (findTrack) {
       this.db.delete('Tracks', findTrack.id);
-      return `Track: ${findTrack.name} is succesfully deleted.`;
+      return;
     }
   }
 }

@@ -17,30 +17,40 @@ export class UserService {
   constructor(@Inject('DATABASE') private readonly db: InMemoryMapDB) {}
   create(createUserDto: CreateUserDto) {
     const { login, password } = createUserDto;
-    const createId = randomUUID();
+
     if (!login || !password) {
-      throw new BadRequestException('Required field is ', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    } else {
-      const isoData = new Date().toISOString();
-      return this.db.insert<User>(
-        'Users',
-        {
-          login,
-          password,
-          createdAt: isoData,
-          updatedAt: isoData,
-          id: createId,
-          version: 1,
-        },
-        createId,
+      throw new BadRequestException(
+        'Missing required fields: login and password',
       );
     }
+
+    const createId = randomUUID();
+    const isoDate = new Date();
+
+    const createdUser = this.db.insert<User>(
+      'Users',
+      {
+        login,
+        password,
+        createdAt: isoDate.getTime(),
+        updatedAt: isoDate.getTime(),
+        id: createId,
+        version: 1,
+      },
+      createId,
+    ) as User;
+
+    const { ...safeUser } = createdUser;
+    delete safeUser.password;
+    return safeUser;
   }
 
   findAll(): CollectionTypes[] {
-    return this.db.getAll('Users');
+    return this.db.getAll('Users').map((user: User) => {
+      const { ...safeUser } = user;
+      delete safeUser.password;
+      return safeUser;
+    });
   }
 
   findOne(id: string) {
@@ -48,27 +58,34 @@ export class UserService {
       throw new BadRequestException('Bad ID', {
         description: 'Wrong id type, check request url and try again',
       });
-    } else {
-      return this.db.findById('Users', id, () => {
-        //error callback
-        throw new NotFoundException('Not found', {
-          description: 'User is not found, try again',
-        });
-      });
     }
+    const findUser = this.db.findById('Users', id, () => {
+      //error callback
+      throw new NotFoundException('Not found', {
+        description: 'User is not found, try again',
+      });
+    }) as User;
+    const { ...safeUser } = findUser;
+    delete safeUser.password;
+    return safeUser;
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
     const { newPassword, oldPassword } = updateUserDto;
 
-    if (!isValidUUID(id)) {
+    if (!isValidUUID(id) || Object.keys(updateUserDto).length <= 1) {
       throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
+        description: 'Wrong id type request, check request url and try again',
+      });
+    }
+    if (!newPassword || !oldPassword) {
+      throw new BadRequestException('Bad Body', {
+        description: 'Wrong body request, check request body and try again',
       });
     }
 
-    const isoData = new Date().toISOString();
-    return this.db.update(
+    const isoDate = new Date();
+    const updateUser = this.db.update(
       'Users',
       id,
       (oldData) => {
@@ -78,7 +95,7 @@ export class UserService {
             ...oldData,
             password: newPassword,
             version: data.version + 1,
-            updatedAt: isoData,
+            updatedAt: isoDate.getTime(),
           };
         } else {
           throw new ForbiddenException('Wrong password', {
@@ -91,7 +108,10 @@ export class UserService {
           description: 'User is not found, try again',
         });
       },
-    );
+    ) as User;
+    const { ...safeUser } = updateUser;
+    delete safeUser.password;
+    return safeUser;
   }
 
   remove(id: string) {
@@ -107,7 +127,7 @@ export class UserService {
     }) as User;
     if (findUser) {
       this.db.delete('Users', findUser.id);
-      return `User: ${findUser.login} is succesfully deleted.`;
+      return;
     }
   }
 }

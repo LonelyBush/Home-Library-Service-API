@@ -6,9 +6,7 @@ import { InMemoryMapDB } from './innerDb/innerDb';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const dbModule = app.select(DatabaseModule);
-  const db = dbModule.get<InMemoryMapDB>('DATABASE');
-  db.createCollection('Users');
-  db.createCollection('Tracks');
+  dbModule.get<InMemoryMapDB>('DATABASE');
   await app.listen(4000);
 }
 bootstrap();
