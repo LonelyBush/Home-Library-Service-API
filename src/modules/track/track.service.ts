@@ -12,6 +12,7 @@ import { Track } from './entities/track.entity';
 import { InMemoryMapDB } from 'src/innerDb/innerDb';
 import { Artist } from '../artist/entities/artist.entity';
 import { Album } from '../album/entities/album.entity';
+import { Favorites } from '../favs/entities/fav.entity';
 
 @Injectable()
 export class TrackService {
@@ -115,6 +116,33 @@ export class TrackService {
     }) as Track;
     if (findTrack) {
       this.db.delete('Tracks', findTrack.id);
+      const getFavs = this.db
+        .getAll('Favorites')
+        .map((el: Favorites & { id: string }) => ({
+          tracks: el.tracks,
+          id: el.id,
+        }))[0];
+
+      if (getFavs && getFavs.tracks.some((el) => el.id === findTrack.id)) {
+        const updateFavTracks = getFavs.tracks.filter(
+          (el) => el.id !== findTrack.id,
+        );
+        this.db.update(
+          'Favorites',
+          getFavs.id,
+          (oldData) => {
+            return {
+              ...oldData,
+              tracks: updateFavTracks,
+            };
+          },
+          () => {
+            throw new NotFoundException('Not found', {
+              description: 'Favs is not found, try again',
+            });
+          },
+        );
+      }
       return;
     }
   }

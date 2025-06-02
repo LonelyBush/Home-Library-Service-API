@@ -12,6 +12,7 @@ import { Artist } from './entities/artist.entity';
 import { isValidUUID } from 'src/utils/validateUUID';
 import { Album } from '../album/entities/album.entity';
 import { Track } from '../track/entities/track.entity';
+import { Favorites } from '../favs/entities/fav.entity';
 
 @Injectable()
 export class ArtistService {
@@ -105,8 +106,37 @@ export class ArtistService {
       const findTrack = this.db.find('Tracks', {
         artistId: findArtist.id,
       })[0] as Track;
+      const getFavs = this.db
+        .getAll('Favorites')
+        .map((el: Favorites & { id: string }) => ({
+          albums: el.albums,
+          tracks: el.tracks,
+          artists: el.artists,
+          id: el.id,
+        }))[0];
 
-      if (findAlbum)
+      if (getFavs && getFavs.artists.some((el) => el.id === findArtist.id)) {
+        const updateFavArtists = getFavs.artists.filter(
+          (el) => el.id !== findArtist.id,
+        );
+        this.db.update(
+          'Favorites',
+          getFavs.id,
+          (oldData) => {
+            return {
+              ...oldData,
+              artists: updateFavArtists,
+            };
+          },
+          () => {
+            throw new NotFoundException('Not found', {
+              description: 'Favs is not found, try again',
+            });
+          },
+        );
+      }
+
+      if (findAlbum) {
         this.db.update(
           'Albums',
           findAlbum.id,
@@ -118,8 +148,35 @@ export class ArtistService {
           },
           () => {},
         );
+        if (
+          getFavs &&
+          getFavs.albums.some((el) => el.artistId === findArtist.id)
+        ) {
+          const updateFavAlbums = getFavs.albums.map((el) => {
+            if (findAlbum.id === el.id) {
+              return { ...el, artistId: null };
+            }
+            return { ...el };
+          });
+          this.db.update(
+            'Favorites',
+            getFavs.id,
+            (oldData) => {
+              return {
+                ...oldData,
+                albums: updateFavAlbums,
+              };
+            },
+            () => {
+              throw new NotFoundException('Not found', {
+                description: 'Favs is not found, try again',
+              });
+            },
+          );
+        }
+      }
 
-      if (findTrack)
+      if (findTrack) {
         this.db.update(
           'Tracks',
           findTrack.id,
@@ -131,6 +188,33 @@ export class ArtistService {
           },
           () => {},
         );
+        if (
+          getFavs &&
+          getFavs.tracks.some((el) => el.artistId === findArtist.id)
+        ) {
+          const updateFavTracks = getFavs.tracks.map((el) => {
+            if (findTrack.id === el.id) {
+              return { ...el, artistId: null };
+            }
+            return { ...el };
+          });
+          this.db.update(
+            'Favorites',
+            getFavs.id,
+            (oldData) => {
+              return {
+                ...oldData,
+                tracks: updateFavTracks,
+              };
+            },
+            () => {
+              throw new NotFoundException('Not found', {
+                description: 'Favs is not found, try again',
+              });
+            },
+          );
+        }
+      }
 
       return;
     }

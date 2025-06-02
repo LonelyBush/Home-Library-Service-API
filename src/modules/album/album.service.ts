@@ -12,6 +12,7 @@ import { Album } from './entities/album.entity';
 import { isValidUUID } from 'src/utils/validateUUID';
 import { Artist } from '../artist/entities/artist.entity';
 import { Track } from '../track/entities/track.entity';
+import { Favorites } from '../favs/entities/fav.entity';
 
 @Injectable()
 export class AlbumService {
@@ -115,8 +116,36 @@ export class AlbumService {
       const findTrack = this.db.find('Tracks', {
         albumId: findAlbum.id,
       })[0] as Track;
+      const getFavs = this.db
+        .getAll('Favorites')
+        .map((el: Favorites & { id: string }) => ({
+          albums: el.albums,
+          tracks: el.tracks,
+          id: el.id,
+        }))[0];
 
-      if (findTrack)
+      if (getFavs && getFavs.albums.some((el) => el.id === findAlbum.id)) {
+        const updateFavArtists = getFavs.albums.filter(
+          (el) => el.id !== findAlbum.id,
+        );
+        this.db.update(
+          'Favorites',
+          getFavs.id,
+          (oldData) => {
+            return {
+              ...oldData,
+              albums: updateFavArtists,
+            };
+          },
+          () => {
+            throw new NotFoundException('Not found', {
+              description: 'Favs is not found, try again',
+            });
+          },
+        );
+      }
+
+      if (findTrack) {
         this.db.update(
           'Tracks',
           findTrack.id,
@@ -128,6 +157,33 @@ export class AlbumService {
           },
           () => {},
         );
+        if (
+          getFavs &&
+          getFavs.tracks.some((el) => el.albumId === findAlbum.id)
+        ) {
+          const updateFavTracks = getFavs.tracks.map((el) => {
+            if (findTrack.id === el.id) {
+              return { ...el, albumId: null };
+            }
+            return { ...el };
+          });
+          this.db.update(
+            'Favorites',
+            getFavs.id,
+            (oldData) => {
+              return {
+                ...oldData,
+                tracks: updateFavTracks,
+              };
+            },
+            () => {
+              throw new NotFoundException('Not found', {
+                description: 'Favs is not found, try again',
+              });
+            },
+          );
+        }
+      }
       return;
     }
   }
