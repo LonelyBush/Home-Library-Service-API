@@ -1,7 +1,9 @@
-import { Track } from 'src/track/entities/track.entity';
-import { User } from 'src/user/entities/user.entity';
+import { Album } from 'src/modules/album/entities/album.entity';
+import { Artist } from 'src/modules/artist/entities/artist.entity';
+import { Track } from 'src/modules/track/entities/track.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 
-export type CollectionTypes = (User | Track) & {
+export type CollectionTypes = (User | Track | Album | Artist) & {
   id?: string;
 };
 

@@ -4,31 +4,30 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateTrackDto } from './dto/create-track.dto';
-import { UpdateTrackDto } from './dto/update-track.dto';
-import { randomUUID } from 'crypto';
-import { isValidUUID } from 'src/utils/validateUUID';
-import { Track } from './entities/track.entity';
+import { CreateAlbumDto } from './dto/create-album.dto';
+import { UpdateAlbumDto } from './dto/update-album.dto';
 import { InMemoryMapDB } from 'src/innerDb/innerDb';
+import { randomUUID } from 'crypto';
+import { Album } from './entities/album.entity';
+import { isValidUUID } from 'src/utils/validateUUID';
 
 @Injectable()
-export class TrackService {
+export class AlbumService {
   constructor(@Inject('DATABASE') private readonly db: InMemoryMapDB) {}
-  create(createTrackDto: CreateTrackDto) {
-    const { name, duration, artistId, albumId } = createTrackDto;
+  create(createAlbumDto: CreateAlbumDto) {
+    const { name, artistId, year } = createAlbumDto;
     const createId = randomUUID();
-    if (!name || !duration) {
+    if (!name || !year) {
       throw new BadRequestException('Required field is missing', {
         description: 'Check your body request, and try again',
       });
     } else {
-      return this.db.insert<Track>(
-        'Tracks',
+      return this.db.insert<Album>(
+        'Albums',
         {
           name,
-          duration,
+          year,
           artistId: artistId ?? null,
-          albumId: albumId ?? null,
           id: createId,
         },
         createId,
@@ -37,7 +36,7 @@ export class TrackService {
   }
 
   findAll() {
-    return this.db.getAll('Tracks');
+    return this.db.getAll('Albums');
   }
 
   findOne(id: string) {
@@ -46,17 +45,17 @@ export class TrackService {
         description: 'Wrong id type, check request url and try again',
       });
     } else {
-      return this.db.findById('Tracks', id, () => {
+      return this.db.findById('Albums', id, () => {
         //error callback
         throw new NotFoundException('Not found', {
-          description: 'Track is not found, try again',
+          description: 'Album is not found, try again',
         });
       });
     }
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
-    const { name, duration, albumId, artistId } = updateTrackDto;
+  update(id: string, updateAlbumDto: UpdateAlbumDto) {
+    const { name, artistId, year } = updateAlbumDto;
     if (!isValidUUID(id)) {
       throw new BadRequestException('Bad ID', {
         description: 'Wrong id type, check request url and try again',
@@ -64,30 +63,33 @@ export class TrackService {
     }
     if (
       typeof name !== 'string' ||
-      typeof albumId !== 'string' ||
       typeof artistId !== 'string' ||
-      typeof duration !== 'number'
+      typeof year !== 'number'
     ) {
       throw new BadRequestException('Bad Body', {
         description: 'Wrong body request, check request body and try again',
       });
     }
+    if (!name || !year) {
+      throw new BadRequestException('Required field is missing', {
+        description: 'Check your body request, and try again',
+      });
+    }
 
     const updatedTrack = this.db.update(
-      'Tracks',
+      'Albums',
       id,
       (oldData) => {
         return {
           ...oldData,
           name,
-          duration,
-          albumId: albumId ?? null,
+          year,
           artistId: artistId ?? null,
         };
       },
       () => {
         throw new NotFoundException('Not found', {
-          description: 'Track is not found, try again',
+          description: 'Album is not found, try again',
         });
       },
     );
@@ -100,13 +102,13 @@ export class TrackService {
         description: 'Wrong id type, check request url and try again',
       });
     }
-    const findTrack = this.db.findById('Tracks', id, () => {
+    const findTrack = this.db.findById('Albums', id, () => {
       throw new NotFoundException('Not found', {
-        description: 'Track is not found, try again',
+        description: 'Album is not found, try again',
       });
-    }) as Track;
+    }) as Album;
     if (findTrack) {
-      this.db.delete('Tracks', findTrack.id);
+      this.db.delete('Albums', findTrack.id);
       return;
     }
   }
