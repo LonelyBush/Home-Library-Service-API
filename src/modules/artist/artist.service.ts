@@ -10,6 +10,8 @@ import { InMemoryMapDB } from 'src/innerDb/innerDb';
 import { randomUUID } from 'crypto';
 import { Artist } from './entities/artist.entity';
 import { isValidUUID } from 'src/utils/validateUUID';
+import { Album } from '../album/entities/album.entity';
+import { Track } from '../track/entities/track.entity';
 
 @Injectable()
 export class ArtistService {
@@ -65,9 +67,8 @@ export class ArtistService {
         description: 'Wrong body request, check request body and try again',
       });
     }
-
     const updatedArtists = this.db.update(
-      'Artits',
+      'Artists',
       id,
       (oldData) => {
         return {
@@ -98,6 +99,39 @@ export class ArtistService {
     }) as Artist;
     if (findArtist) {
       this.db.delete('Artists', findArtist.id);
+      const findAlbum = this.db.find('Albums', {
+        artistId: findArtist.id,
+      })[0] as Album;
+      const findTrack = this.db.find('Tracks', {
+        artistId: findArtist.id,
+      })[0] as Track;
+
+      if (findAlbum)
+        this.db.update(
+          'Albums',
+          findAlbum.id,
+          (oldData) => {
+            return {
+              ...oldData,
+              artistId: null,
+            };
+          },
+          () => {},
+        );
+
+      if (findTrack)
+        this.db.update(
+          'Tracks',
+          findTrack.id,
+          (oldData) => {
+            return {
+              ...oldData,
+              artistId: null,
+            };
+          },
+          () => {},
+        );
+
       return;
     }
   }

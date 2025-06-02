@@ -45,6 +45,7 @@ export class InMemoryMapDB {
       return getCollection;
     } else {
       callbackErr();
+      //return null;
     }
   }
   getAll(collectionName: string) {

@@ -10,6 +10,8 @@ import { randomUUID } from 'crypto';
 import { isValidUUID } from 'src/utils/validateUUID';
 import { Track } from './entities/track.entity';
 import { InMemoryMapDB } from 'src/innerDb/innerDb';
+import { Artist } from '../artist/entities/artist.entity';
+import { Album } from '../album/entities/album.entity';
 
 @Injectable()
 export class TrackService {
@@ -62,12 +64,7 @@ export class TrackService {
         description: 'Wrong id type, check request url and try again',
       });
     }
-    if (
-      typeof name !== 'string' ||
-      typeof albumId !== 'string' ||
-      typeof artistId !== 'string' ||
-      typeof duration !== 'number'
-    ) {
+    if (typeof name !== 'string' || typeof duration !== 'number') {
       throw new BadRequestException('Bad Body', {
         description: 'Wrong body request, check request body and try again',
       });
@@ -77,7 +74,13 @@ export class TrackService {
         description: 'Check your body request, and try again',
       });
     }
-
+    const findArtist = this.db.findById('Artists', artistId, () => {
+      console.log('Artist is not found. artistId will be set as null');
+    }) as Artist;
+    const findAlbum = this.db.findById('Albums', albumId, () => {
+      console.log('Album is not found. albumId will be set as null');
+    }) as Album;
+    console.log(findAlbum, findAlbum);
     const updatedTrack = this.db.update(
       'Tracks',
       id,
@@ -86,8 +89,8 @@ export class TrackService {
           ...oldData,
           name,
           duration,
-          albumId: albumId ?? null,
-          artistId: artistId ?? null,
+          albumId: findAlbum?.id ?? null,
+          artistId: findArtist?.id ?? null,
         };
       },
       () => {

@@ -10,6 +10,8 @@ import { InMemoryMapDB } from 'src/innerDb/innerDb';
 import { randomUUID } from 'crypto';
 import { Album } from './entities/album.entity';
 import { isValidUUID } from 'src/utils/validateUUID';
+import { Artist } from '../artist/entities/artist.entity';
+import { Track } from '../track/entities/track.entity';
 
 @Injectable()
 export class AlbumService {
@@ -56,16 +58,13 @@ export class AlbumService {
 
   update(id: string, updateAlbumDto: UpdateAlbumDto) {
     const { name, artistId, year } = updateAlbumDto;
+    console.log(isValidUUID('0a35dd62-e09f-444b-a628-f4e7c6954f57'));
     if (!isValidUUID(id)) {
       throw new BadRequestException('Bad ID', {
         description: 'Wrong id type, check request url and try again',
       });
     }
-    if (
-      typeof name !== 'string' ||
-      typeof artistId !== 'string' ||
-      typeof year !== 'number'
-    ) {
+    if (typeof name !== 'string' || typeof year !== 'number') {
       throw new BadRequestException('Bad Body', {
         description: 'Wrong body request, check request body and try again',
       });
@@ -76,6 +75,10 @@ export class AlbumService {
       });
     }
 
+    const findArtist = this.db.findById('Artists', artistId, () => {
+      console.log('Artist is not found. artistId will be set as null');
+    }) as Artist;
+
     const updatedTrack = this.db.update(
       'Albums',
       id,
@@ -84,7 +87,7 @@ export class AlbumService {
           ...oldData,
           name,
           year,
-          artistId: artistId ?? null,
+          artistId: findArtist?.id ?? null,
         };
       },
       () => {
@@ -102,13 +105,29 @@ export class AlbumService {
         description: 'Wrong id type, check request url and try again',
       });
     }
-    const findTrack = this.db.findById('Albums', id, () => {
+    const findAlbum = this.db.findById('Albums', id, () => {
       throw new NotFoundException('Not found', {
         description: 'Album is not found, try again',
       });
     }) as Album;
-    if (findTrack) {
-      this.db.delete('Albums', findTrack.id);
+    if (findAlbum) {
+      this.db.delete('Albums', findAlbum.id);
+      const findTrack = this.db.find('Tracks', {
+        albumId: findAlbum.id,
+      })[0] as Track;
+
+      if (findTrack)
+        this.db.update(
+          'Tracks',
+          findTrack.id,
+          (oldData) => {
+            return {
+              ...oldData,
+              albumId: null,
+            };
+          },
+          () => {},
+        );
       return;
     }
   }
