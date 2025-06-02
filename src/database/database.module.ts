@@ -1,4 +1,5 @@
 import { Inject, Module } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { InMemoryMapDB } from 'src/innerDb/innerDb';
 
 @Module({
@@ -17,7 +18,6 @@ export class DatabaseModule {
     this.db.createCollection('Users');
 
     //hardcoded Tracks
-    // Hardcoded Tracks (исправленные связи)
     this.db.insert(
       'Tracks',
       {
@@ -45,8 +45,8 @@ export class DatabaseModule {
       {
         id: '68b68fe7-7534-406b-8272-55bed7b397de',
         name: 'Jigsaw Falling Into Place',
-        artistId: '92b44df4-3632-496f-8d92-ba9150768758', // Исправленный ID Radiohead
-        albumId: '75fc377e-6bbc-4c50-ae66-fe298b6771ea', // Исправленный ID In Rainbows
+        artistId: '92b44df4-3632-496f-8d92-ba9150768758',
+        albumId: '75fc377e-6bbc-4c50-ae66-fe298b6771ea',
         duration: 248,
       },
       '68b68fe7-7534-406b-8272-55bed7b397de',
@@ -139,6 +139,56 @@ export class DatabaseModule {
         grammy: false,
       },
       '52ad0dec-6dd9-4bd7-becf-c4f90131d461',
+    );
+
+    //hardcoded Favorites
+    this.db.insert(
+      'Favorites',
+      {
+        tracks: [
+          {
+            id: '7a15c356-f008-4fa4-9a31-673fa747c60e',
+            name: 'Bohemian Rhapsody',
+            artistId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+            albumId: '1e9d8c7b-6f45-4a23-9a7b-2d3c4d5e6f70',
+            duration: 354,
+          },
+          {
+            id: '68b68fe7-7534-406b-8272-55bed7b397de',
+            name: 'Jigsaw Falling Into Place',
+            artistId: '92b44df4-3632-496f-8d92-ba9150768758',
+            albumId: '75fc377e-6bbc-4c50-ae66-fe298b6771ea',
+            duration: 248,
+          },
+        ],
+        albums: [
+          {
+            id: '75fc377e-6bbc-4c50-ae66-fe298b6771ea',
+            name: 'In Rainbows',
+            year: 2007,
+            artistId: '92b44df4-3632-496f-8d92-ba9150768758',
+          },
+          {
+            id: '50c98043-d9ad-4086-b894-c508ef954e08',
+            name: 'Abbey Road',
+            year: 1969,
+            artistId: 'b1c7d4e9-2f6a-4ac5-9a7d-3e8f6a5b4c7d',
+          },
+        ],
+        artists: [
+          {
+            id: 'b1c7d4e9-2f6a-4ac5-9a7d-3e8f6a5b4c7d',
+            name: 'The Beatles',
+            grammy: true,
+          },
+          {
+            id: '92b44df4-3632-496f-8d92-ba9150768758',
+            name: 'Radiohead',
+            grammy: true,
+          },
+        ],
+      },
+      randomUUID(),
     );
   }
 }

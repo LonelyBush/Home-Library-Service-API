@@ -4,8 +4,16 @@ import { TrackModule } from './modules/track/track.module';
 import { DatabaseModule } from './database/database.module';
 import { AlbumModule } from './modules/album/album.module';
 import { ArtistModule } from './modules/artist/artist.module';
+import { FavsModule } from './modules/favs/favs.module';
 
 @Module({
-  imports: [DatabaseModule, UserModule, TrackModule, AlbumModule, ArtistModule],
+  imports: [
+    DatabaseModule,
+    UserModule,
+    TrackModule,
+    AlbumModule,
+    ArtistModule,
+    FavsModule,
+  ],
 })
 export class AppModule {}
