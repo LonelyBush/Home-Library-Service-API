@@ -7,6 +7,6 @@ import { ArtistModule } from './modules/artist/artist.module';
 import { FavsModule } from './modules/favs/favs.module';
 
 @Module({
-  imports: [DatabaseModule, UserModule],
+  imports: [DatabaseModule, UserModule, ArtistModule],
 })
 export class AppModule {}

@@ -1,16 +1,15 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InMemoryMapDB } from 'src/innerDb/innerDb';
-import { isValidUUID } from 'src/utils/validateUUID';
 import { Favorites } from './entities/fav.entity';
 import { Track } from '../track/entities/track.entity';
 import { Artist } from '../artist/entities/artist.entity';
 import { Album } from '../album/entities/album.entity';
+import { idParam } from 'src/common-dto/idParam.dto';
 
 @Injectable()
 export class FavsService {
@@ -23,12 +22,8 @@ export class FavsService {
       artists: el.artists,
     }))[0];
   }
-  addTrack(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+  addTrack(param: idParam) {
+    const { id } = param;
     const findTrack = this.db.findById('Tracks', id, () => {
       throw new UnprocessableEntityException('Track id doesnt exists');
     }) as Track;
@@ -65,12 +60,8 @@ export class FavsService {
       }
     }
   }
-  addAlbum(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+  addAlbum(param: idParam) {
+    const { id } = param;
     const findAlbum = this.db.findById('Albums', id, () => {
       throw new UnprocessableEntityException('Album id doesnt exists');
     }) as Album;
@@ -107,12 +98,8 @@ export class FavsService {
       }
     }
   }
-  addArtist(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+  addArtist(param: idParam) {
+    const { id } = param;
     const findArtist = this.db.findById('Artists', id, () => {
       throw new UnprocessableEntityException('Artist id doesnt exists');
     }) as Artist;
@@ -151,12 +138,8 @@ export class FavsService {
     }
   }
 
-  removeTrack(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+  removeTrack(param: idParam) {
+    const { id } = param;
     const findTrack = this.db.findById('Tracks', id, () => {
       throw new NotFoundException('Tracks is not found, try again');
     }) as Track;
@@ -194,12 +177,8 @@ export class FavsService {
       }
     }
   }
-  removeAlbum(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+  removeAlbum(param: idParam) {
+    const { id } = param;
     const findAlbum = this.db.findById('Albums', id, () => {
       throw new NotFoundException('Album is not found, try again');
     }) as Album;
@@ -237,12 +216,8 @@ export class FavsService {
       }
     }
   }
-  removeArtist(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+  removeArtist(param: idParam) {
+    const { id } = param;
     const findArtist = this.db.findById('Artists', id, () => {
       throw new UnprocessableEntityException('Artist id doesnt exists');
     }) as Artist;

@@ -7,12 +7,12 @@ import {
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { randomUUID } from 'crypto';
-import { isValidUUID } from 'src/utils/validateUUID';
 import { Track } from './entities/track.entity';
 import { InMemoryMapDB } from 'src/innerDb/innerDb';
 import { Artist } from '../artist/entities/artist.entity';
 import { Album } from '../album/entities/album.entity';
 import { Favorites } from '../favs/entities/fav.entity';
+import { idParam } from 'src/common-dto/idParam.dto';
 
 @Injectable()
 export class TrackService {
@@ -43,28 +43,19 @@ export class TrackService {
     return this.db.getAll('Tracks');
   }
 
-  findOne(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
+  findOne(param: idParam) {
+    const { id } = param;
+    return this.db.findById('Tracks', id, () => {
+      //error callback
+      throw new NotFoundException('Not found', {
+        description: 'Track is not found, try again',
       });
-    } else {
-      return this.db.findById('Tracks', id, () => {
-        //error callback
-        throw new NotFoundException('Not found', {
-          description: 'Track is not found, try again',
-        });
-      });
-    }
+    });
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
+  update(param: idParam, updateTrackDto: UpdateTrackDto) {
     const { name, duration, albumId, artistId } = updateTrackDto;
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+    const { id } = param;
     if (typeof name !== 'string' || typeof duration !== 'number') {
       throw new BadRequestException('Bad Body', {
         description: 'Wrong body request, check request body and try again',
@@ -103,12 +94,8 @@ export class TrackService {
     return updatedTrack;
   }
 
-  remove(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+  remove(param: idParam) {
+    const { id } = param;
     const findTrack = this.db.findById('Tracks', id, () => {
       throw new NotFoundException('Not found', {
         description: 'Track is not found, try again',

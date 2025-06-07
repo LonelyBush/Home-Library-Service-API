@@ -11,6 +11,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
+import { idParam } from 'src/common-dto/idParam.dto';
 
 @Controller('user')
 export class UserController {
@@ -27,18 +28,18 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  findOne(@Param() params: idParam) {
+    return this.userService.findOne(params);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  update(@Param() params: idParam, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(params, updateUserDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string) {
-    return this.userService.remove(id);
+  remove(@Param() params: idParam) {
+    return this.userService.remove(params);
   }
 }

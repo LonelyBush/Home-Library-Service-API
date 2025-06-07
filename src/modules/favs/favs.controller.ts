@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Param, Delete, HttpCode } from '@nestjs/common';
 import { FavsService } from './favs.service';
+import { idParam } from 'src/common-dto/idParam.dto';
 
 @Controller('favs')
 export class FavsController {
@@ -9,31 +10,31 @@ export class FavsController {
     return this.favsService.findAll();
   }
   @Post('/track/:id')
-  addTrack(@Param('id') id: string) {
-    return this.favsService.addTrack(id);
+  addTrack(@Param() params: idParam) {
+    return this.favsService.addTrack(params);
   }
   @Post('/album/:id')
-  addAlbum(@Param('id') id: string) {
-    return this.favsService.addAlbum(id);
+  addAlbum(@Param() params: idParam) {
+    return this.favsService.addAlbum(params);
   }
   @Post('/artist/:id')
-  addArtist(@Param('id') id: string) {
-    return this.favsService.addArtist(id);
+  addArtist(@Param() params: idParam) {
+    return this.favsService.addArtist(params);
   }
 
   @Delete('/track/:id')
   @HttpCode(204)
-  removeTrack(@Param('id') id: string) {
-    return this.favsService.removeTrack(id);
+  removeTrack(@Param() params: idParam) {
+    return this.favsService.removeTrack(params);
   }
   @Delete('/album/:id')
   @HttpCode(204)
-  removeAlbum(@Param('id') id: string) {
-    return this.favsService.removeAlbum(id);
+  removeAlbum(@Param() params: idParam) {
+    return this.favsService.removeAlbum(params);
   }
   @Delete('/artist/:id')
   @HttpCode(204)
-  removeArtist(@Param('id') id: string) {
-    return this.favsService.removeArtist(id);
+  removeArtist(@Param() params: idParam) {
+    return this.favsService.removeArtist(params);
   }
 }

@@ -11,6 +11,7 @@ import {
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { idParam } from 'src/common-dto/idParam.dto';
 
 @Controller('artist')
 export class ArtistController {
@@ -27,18 +28,18 @@ export class ArtistController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.artistService.findOne(id);
+  findOne(@Param() param: idParam) {
+    return this.artistService.findOne(param);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateArtistDto: UpdateArtistDto) {
-    return this.artistService.update(id, updateArtistDto);
+  update(@Param() params: idParam, @Body() updateArtistDto: UpdateArtistDto) {
+    return this.artistService.update(params, updateArtistDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string) {
-    return this.artistService.remove(id);
+  remove(@Param() params: idParam) {
+    return this.artistService.remove(params);
   }
 }

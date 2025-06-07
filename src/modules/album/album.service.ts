@@ -9,10 +9,10 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 import { InMemoryMapDB } from 'src/innerDb/innerDb';
 import { randomUUID } from 'crypto';
 import { Album } from './entities/album.entity';
-import { isValidUUID } from 'src/utils/validateUUID';
 import { Artist } from '../artist/entities/artist.entity';
 import { Track } from '../track/entities/track.entity';
 import { Favorites } from '../favs/entities/fav.entity';
+import { idParam } from 'src/common-dto/idParam.dto';
 
 @Injectable()
 export class AlbumService {
@@ -42,29 +42,19 @@ export class AlbumService {
     return this.db.getAll('Albums');
   }
 
-  findOne(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
+  findOne(param: idParam) {
+    const { id } = param;
+    return this.db.findById('Albums', id, () => {
+      //error callback
+      throw new NotFoundException('Not found', {
+        description: 'Album is not found, try again',
       });
-    } else {
-      return this.db.findById('Albums', id, () => {
-        //error callback
-        throw new NotFoundException('Not found', {
-          description: 'Album is not found, try again',
-        });
-      });
-    }
+    });
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto) {
+  update(param: idParam, updateAlbumDto: UpdateAlbumDto) {
     const { name, artistId, year } = updateAlbumDto;
-    console.log(isValidUUID('0a35dd62-e09f-444b-a628-f4e7c6954f57'));
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+    const { id } = param;
     if (typeof name !== 'string' || typeof year !== 'number') {
       throw new BadRequestException('Bad Body', {
         description: 'Wrong body request, check request body and try again',
@@ -100,12 +90,8 @@ export class AlbumService {
     return updatedTrack;
   }
 
-  remove(id: string) {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+  remove(param: idParam) {
+    const { id } = param;
     const findAlbum = this.db.findById('Albums', id, () => {
       throw new NotFoundException('Not found', {
         description: 'Album is not found, try again',

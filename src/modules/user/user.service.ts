@@ -1,7 +1,11 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { isValidUUID } from 'src/utils/validateUUID';
+import { idParam } from 'src/common-dto/idParam.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -19,38 +23,31 @@ export class UserService {
     return this.usersRep.find();
   }
 
-  findOne(id: string): Promise<User | null> {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
-    return this.usersRep.findOneBy({ id });
+  async findOne(param: idParam): Promise<User | null> {
+    const { id } = param;
+    const getUser = await this.usersRep.findOneBy({ id });
+    if (!getUser) throw new NotFoundException('User not found');
+
+    return getUser;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(param: idParam, updateUserDto: UpdateUserDto) {
     const { newPassword, oldPassword } = updateUserDto;
+    const { id } = param;
 
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type request, check request url and try again',
-      });
-    }
     const user = await this.usersRep.findOneBy({ id });
     const updateUser = new User();
     if (oldPassword === user.password) {
       updateUser.password = newPassword;
       updateUser.id = id;
+    } else {
+      throw new ForbiddenException('Password: old password is wrong');
     }
     return this.usersRep.save({ ...user });
   }
 
-  async remove(id: string): Promise<void> {
-    if (!isValidUUID(id)) {
-      throw new BadRequestException('Bad ID', {
-        description: 'Wrong id type, check request url and try again',
-      });
-    }
+  async remove(param: idParam): Promise<void> {
+    const { id } = param;
     await this.usersRep.delete(id);
   }
 }
