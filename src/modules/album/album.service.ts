@@ -31,6 +31,7 @@ export class AlbumService {
     const { name, artistId, year } = updateAlbumDto;
     const { id } = param;
     const getAlbum = await this.albumDb.findOneBy({ id });
+    if (!getAlbum) throw new NotFoundException('Album not found');
     const updateAlbum = new Album();
     updateAlbum.name = name ?? getAlbum.name;
     updateAlbum.year = year ?? getAlbum.year;
@@ -41,6 +42,8 @@ export class AlbumService {
 
   async remove(param: idParam) {
     const { id } = param;
+    const getAlbum = await this.albumDb.findOneBy({ id });
+    if (!getAlbum) throw new NotFoundException('Album not found');
     await this.albumDb.delete(id);
   }
 }

@@ -31,6 +31,7 @@ export class TrackService {
     const { name, duration, albumId, artistId } = updateTrackDto;
     const { id } = param;
     const getTrack = await this.trackDb.findOneBy({ id });
+    if (!getTrack) throw new NotFoundException('Track not found');
     const updateTrack = new Track();
     updateTrack.name = name ?? getTrack.name;
     updateTrack.duration = duration ?? getTrack.duration;
@@ -42,6 +43,8 @@ export class TrackService {
 
   async remove(param: idParam) {
     const { id } = param;
+    const getTrack = await this.trackDb.findOneBy({ id });
+    if (!getTrack) throw new NotFoundException('Track not found');
     await this.trackDb.delete(id);
   }
 }

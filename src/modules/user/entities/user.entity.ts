@@ -18,8 +18,18 @@ export class User {
   password: string;
   @VersionColumn()
   version: number; // integer number, increments on update
-  @CreateDateColumn()
-  createdAt: number; // timestamp of creation
-  @UpdateDateColumn()
-  updatedAt: number; // timestamp of last update
+  @CreateDateColumn({
+    transformer: {
+      to: (val: number) => val,
+      from: (val: Date) => (val ? val.getTime() : null),
+    },
+  })
+  createdAt: Date; // timestamp of creation
+  @UpdateDateColumn({
+    transformer: {
+      to: (val: number) => val,
+      from: (val: Date) => (val ? val.getTime() : null),
+    },
+  })
+  updatedAt: Date; // timestamp of last update
 }

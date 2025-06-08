@@ -31,6 +31,7 @@ export class ArtistService {
     const { name, grammy } = updateArtistDto;
     const { id } = param;
     const getArtist = await this.artistDb.findOneBy({ id });
+    if (!getArtist) throw new NotFoundException('Artist not found');
     const updateArtist = new Artist();
     updateArtist.name = name ?? getArtist.name;
     updateArtist.grammy = grammy ?? getArtist.grammy;
@@ -40,6 +41,8 @@ export class ArtistService {
 
   async remove(param: idParam) {
     const { id } = param;
+    const getArtist = await this.artistDb.findOneBy({ id });
+    if (!getArtist) throw new NotFoundException('Artist not found');
     await this.artistDb.delete(id);
   }
 }

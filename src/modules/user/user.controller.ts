@@ -16,17 +16,14 @@ import { idParam } from 'src/common-dto/idParam.dto';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
-
   @Get()
   findAll() {
     return this.userService.findAll();
   }
-
   @Get(':id')
   findOne(@Param() params: idParam) {
     return this.userService.findOne(params);
