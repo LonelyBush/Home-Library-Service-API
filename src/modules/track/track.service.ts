@@ -1,136 +1,47 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { randomUUID } from 'crypto';
 import { Track } from './entities/track.entity';
-import { InMemoryMapDB } from 'src/innerDb/innerDb';
-import { Artist } from '../artist/entities/artist.entity';
-import { Album } from '../album/entities/album.entity';
-import { Favorites } from '../favs/entities/fav.entity';
 import { idParam } from 'src/common-dto/idParam.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
-  constructor(@Inject('DATABASE') private readonly db: InMemoryMapDB) {}
+  constructor(
+    @InjectRepository(Track) private readonly trackDb: Repository<Track>,
+  ) {}
   create(createTrackDto: CreateTrackDto) {
-    const { name, duration, artistId, albumId } = createTrackDto;
-    const createId = randomUUID();
-    if (!name || !duration) {
-      throw new BadRequestException('Required field is missing', {
-        description: 'Check your body request, and try again',
-      });
-    } else {
-      return this.db.insert<Track>(
-        'Tracks',
-        {
-          name,
-          duration,
-          artistId: artistId ?? null,
-          albumId: albumId ?? null,
-          id: createId,
-        },
-        createId,
-      );
-    }
+    return this.trackDb.save({ ...createTrackDto });
   }
 
   findAll() {
-    return this.db.getAll('Tracks');
+    return this.trackDb.find();
   }
 
-  findOne(param: idParam) {
+  async findOne(param: idParam) {
     const { id } = param;
-    return this.db.findById('Tracks', id, () => {
-      //error callback
-      throw new NotFoundException('Not found', {
-        description: 'Track is not found, try again',
-      });
-    });
+    const getTrack = await this.trackDb.findOneBy({ id });
+    if (!getTrack) throw new NotFoundException('Track not found');
+
+    return getTrack;
   }
 
-  update(param: idParam, updateTrackDto: UpdateTrackDto) {
+  async update(param: idParam, updateTrackDto: UpdateTrackDto) {
     const { name, duration, albumId, artistId } = updateTrackDto;
     const { id } = param;
-    if (typeof name !== 'string' || typeof duration !== 'number') {
-      throw new BadRequestException('Bad Body', {
-        description: 'Wrong body request, check request body and try again',
-      });
-    }
-    if (!name || !duration) {
-      throw new BadRequestException('Required field is missing', {
-        description: 'Check your body request, and try again',
-      });
-    }
-    const findArtist = this.db.findById('Artists', artistId, () => {
-      console.log('Artist is not found. artistId will be set as null');
-    }) as Artist;
-    const findAlbum = this.db.findById('Albums', albumId, () => {
-      console.log('Album is not found. albumId will be set as null');
-    }) as Album;
-    console.log(findAlbum, findAlbum);
-    const updatedTrack = this.db.update(
-      'Tracks',
-      id,
-      (oldData) => {
-        return {
-          ...oldData,
-          name,
-          duration,
-          albumId: findAlbum?.id ?? null,
-          artistId: findArtist?.id ?? null,
-        };
-      },
-      () => {
-        throw new NotFoundException('Not found', {
-          description: 'Track is not found, try again',
-        });
-      },
-    );
-    return updatedTrack;
+    const getTrack = await this.trackDb.findOneBy({ id });
+    const updateTrack = new Track();
+    updateTrack.name = name ?? getTrack.name;
+    updateTrack.duration = duration ?? getTrack.duration;
+    updateTrack.artistId = artistId ?? getTrack.artistId;
+    updateTrack.albumId = albumId ?? getTrack.albumId;
+    updateTrack.id = id;
+    return this.trackDb.save({ ...updateTrack });
   }
 
-  remove(param: idParam) {
+  async remove(param: idParam) {
     const { id } = param;
-    const findTrack = this.db.findById('Tracks', id, () => {
-      throw new NotFoundException('Not found', {
-        description: 'Track is not found, try again',
-      });
-    }) as Track;
-    if (findTrack) {
-      this.db.delete('Tracks', findTrack.id);
-      const getFavs = this.db
-        .getAll('Favorites')
-        .map((el: Favorites & { id: string }) => ({
-          tracks: el.tracks,
-          id: el.id,
-        }))[0];
-
-      if (getFavs && getFavs.tracks.some((el) => el.id === findTrack.id)) {
-        const updateFavTracks = getFavs.tracks.filter(
-          (el) => el.id !== findTrack.id,
-        );
-        this.db.update(
-          'Favorites',
-          getFavs.id,
-          (oldData) => {
-            return {
-              ...oldData,
-              tracks: updateFavTracks,
-            };
-          },
-          () => {
-            throw new NotFoundException('Not found', {
-              description: 'Favs is not found, try again',
-            });
-          },
-        );
-      }
-      return;
-    }
+    await this.trackDb.delete(id);
   }
 }
