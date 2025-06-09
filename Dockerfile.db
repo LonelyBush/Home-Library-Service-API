@@ -1,0 +1,5 @@
+FROM postgres:17
+
+VOLUME ["/var/lib/postgresql/data", "/var/log/postgresql"]
+
+EXPOSE 5432

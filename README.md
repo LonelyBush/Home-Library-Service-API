@@ -1,72 +1,70 @@
-# Home Library Service
+# 🏠 Home Library Service
 
-## Prerequisites
+**Home Library Service** is a RESTful API built with **NestJS**, **TypeORM**, and **PostgreSQL**. The service allows users to manage a personal media library: store data about **Artists**, **Albums**, **Tracks**, and mark them as **Favorites**.
 
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+---
 
-## Downloading
+## 📚 Features
 
+- **User Management**
+  - Register, update, delete users.
+  - Tracks creation and update timestamps.
+  - Password hashing and versioning.
+
+- **Artists**
+  - Full CRUD operations.
+  - Stores Grammy award status (`grammy: boolean`).
+
+- **Albums**
+  - Full CRUD operations.
+  - Associated with artists.
+
+- **Tracks**
+  - Full CRUD operations.
+  - Associated with artists and albums.
+  - Contains track duration.
+
+- **Favorites**
+  - Store favorite artist, album, and track IDs.
+  - Add/remove from Favorites.
+
+---
+
+## 🛠️ Tech Stack
+
+- [NestJS](https://nestjs.com/) – Backend framework
+- [TypeORM](https://typeorm.io/) – ORM for PostgreSQL
+- [PostgreSQL](https://www.postgresql.org/) – Relational database
+- [Docker](https://www.docker.com/) – Containerization
+- [Docker Compose](https://docs.docker.com/compose/) – Container orchestration
+
+---
+
+## 🔨 Build & Run
 ```
-git clone {repository URL}
+docker compose --build
+docker compose up
+```
+---
+
+## 🌐 Access
+
+ - Once the containers are running:
+
+ - API Base URL: http://localhost:4000
+
+ - PostgreSQL: Connect on localhost:5432 with:
+
+ - Swagger UI (if configured): http://localhost:3000/docs
+
+---
+
+## 🌐 Docker Hub
+```
+Docker Hub and can be downloaded using the command:
+docker pull lonelybush/home-library-app:latest
 ```
 
-## Installing NPM modules
+Link to profile on Docker Hub: https://hub.docker.com/u/lonelybush
 
-```
-npm install
-```
-
-## Running application
-
-```
-npm start
-```
-
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
-
-## Testing
-
-After application running open new terminal and enter:
-
-To run all tests without authorization
-
-```
-npm run test
-```
-
-To run only one of all test suites
-
-```
-npm run test -- <path to suite>
-```
-
-To run all test with authorization
-
-```
-npm run test:auth
-```
-
-To run only specific test suite with authorization
-
-```
-npm run test:auth -- <path to suite>
-```
-
-### Auto-fix and format
-
-```
-npm run lint
-```
-
-```
-npm run format
-```
-
-### Debugging in VSCode
-
-Press <kbd>F5</kbd> to debug.
-
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+---

@@ -12,19 +12,22 @@ import { TrackModule } from 'src/modules/track/track.module';
 import { FavsModule } from 'src/modules/favs/favs.module';
 import { Favorites } from 'src/modules/favs/entities/fav.entity';
 
-const { POSTGRES_PASSWORD } = process.env;
+const { POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_USER, POSTGRES_DB } =
+  process.env;
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
+      host: POSTGRES_HOST || 'localhost',
       port: 5432,
-      username: 'postgres',
+      username: POSTGRES_USER,
       password: POSTGRES_PASSWORD,
-      database: 'home-library-service-api',
+      database: POSTGRES_DB,
       entities: [User, Artist, Album, Track, Favorites],
       synchronize: true,
+      autoLoadEntities: true,
     }),
+
     UserModule,
     ArtistModule,
     AlbumModule,

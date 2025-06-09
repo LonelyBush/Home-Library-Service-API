@@ -125,9 +125,9 @@ export class FavsService {
       : getFavs.albums;
 
     await this.favsRep.save({ ...getFavs, albums: [...filteredAlbum] });
-
     return;
   }
+
   async removeArtist(param: idParam) {
     const { id } = param;
     const getArtist = await this.artistDb.findOneBy({ id });
