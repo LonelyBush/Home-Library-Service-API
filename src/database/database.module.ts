@@ -9,6 +9,8 @@ import { AlbumModule } from 'src/modules/album/album.module';
 import { Album } from 'src/modules/album/entities/album.entity';
 import { Track } from 'src/modules/track/entities/track.entity';
 import { TrackModule } from 'src/modules/track/track.module';
+import { FavsModule } from 'src/modules/favs/favs.module';
+import { Favorites } from 'src/modules/favs/entities/fav.entity';
 
 const { POSTGRES_PASSWORD } = process.env;
 @Module({
@@ -20,13 +22,14 @@ const { POSTGRES_PASSWORD } = process.env;
       username: 'postgres',
       password: POSTGRES_PASSWORD,
       database: 'home-library-service-api',
-      entities: [User, Artist, Album, Track],
+      entities: [User, Artist, Album, Track, Favorites],
       synchronize: true,
     }),
     UserModule,
     ArtistModule,
     AlbumModule,
     TrackModule,
+    FavsModule,
   ],
 })
 export class DatabaseModule {}

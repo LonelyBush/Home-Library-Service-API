@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Delete, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Param, HttpCode, Delete } from '@nestjs/common';
 import { FavsService } from './favs.service';
 import { idParam } from 'src/common-dto/idParam.dto';
 
