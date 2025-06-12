@@ -5,6 +5,7 @@ import { readFile } from 'fs/promises';
 import { load as loadYaml } from 'js-yaml';
 import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { HttpExceptionFilter } from './filters/exceptionFilter';
 
 const { PORT } = process.env;
 
@@ -14,6 +15,7 @@ async function bootstrap() {
   const doc = loadYaml(raw) as OpenAPIObject;
   SwaggerModule.setup('doc', app, doc);
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(PORT);
 }
 bootstrap();

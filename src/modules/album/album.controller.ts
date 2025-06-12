@@ -11,7 +11,7 @@ import {
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { idParam } from 'src/common-dto/idParam.dto';
+import { idParam } from 'src/modules/_dto/idParam.dto';
 
 @Controller('album')
 export class AlbumController {

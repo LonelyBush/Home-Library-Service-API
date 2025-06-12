@@ -11,7 +11,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
-import { idParam } from 'src/common-dto/idParam.dto';
+import { idParam } from 'src/modules/_dto/idParam.dto';
 
 @Controller('user')
 export class UserController {
