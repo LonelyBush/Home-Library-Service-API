@@ -6,6 +6,7 @@ import { ArtistModule } from './modules/artist/artist.module';
 import { TrackModule } from './modules/track/track.module';
 import { FavsModule } from './modules/favs/favs.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { FileModule } from './modules/file/file.module';
 import { LoggerModule } from './modules/logger/logger.module';
 
 @Module({
@@ -17,6 +18,7 @@ import { LoggerModule } from './modules/logger/logger.module';
     TrackModule,
     FavsModule,
     LoggerModule,
+    FileModule,
   ],
 })
 export class AppModule implements NestModule {

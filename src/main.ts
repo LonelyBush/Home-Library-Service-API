@@ -6,11 +6,15 @@ import { load as loadYaml } from 'js-yaml';
 import { SwaggerModule, OpenAPIObject } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './filters/exceptionFilter';
+import { resolve } from 'path';
 
 const { PORT } = process.env;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+
   const raw = await readFile('doc/api.yaml', 'utf8');
   const doc = loadYaml(raw) as OpenAPIObject;
   SwaggerModule.setup('doc', app, doc);
@@ -19,3 +23,5 @@ async function bootstrap() {
   await app.listen(PORT);
 }
 bootstrap();
+
+export const __basedir = resolve('./');
