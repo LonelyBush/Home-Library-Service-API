@@ -8,6 +8,7 @@ import { FavsModule } from './modules/favs/favs.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { FileModule } from './modules/file/file.module';
 import { LoggerModule } from './modules/logger/logger.module';
+import { CustomLogger } from './modules/logger/logger.service';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { LoggerModule } from './modules/logger/logger.module';
   ],
 })
 export class AppModule implements NestModule {
+  constructor(private logger: CustomLogger) {}
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes('*');
   }

@@ -16,7 +16,7 @@ export class RotatingFileService {
     @Inject('FILE_NAME')
     private filename: string = 'home-lib',
     @Inject('MAX_SIZE_KB')
-    private maxSize: number,
+    private maxSize: number = 10,
     @Inject('MAX_FILES_IN_ROW')
     private maxFilesInRotateRow: number = 2,
   ) {
@@ -73,7 +73,6 @@ export class RotatingFileService {
     }
 
     this.currentSize += dataSize;
-    console.log(this.currentSize);
     this.writable.write(`\n${uncolorize(data)}`);
   }
 }
