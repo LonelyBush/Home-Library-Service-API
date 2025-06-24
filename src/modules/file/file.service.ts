@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { createWriteStream, WriteStream } from 'fs';
+import { mkdir } from 'fs/promises';
 import { join, extname, basename, dirname } from 'path';
 import { __basedir } from 'src/main';
 import { checkIfFileExists } from 'src/utils/checkIfFileExists';
@@ -58,7 +59,7 @@ export class RotatingFileService {
   }
 
   async init() {
-    this.filepath = join(__basedir, `/logs/${this.filename}`);
+    await mkdir(dirname(this.filepath), { recursive: true });
     const isExists = await checkIfFileExists(this.filepath);
 
     if (isExists) {
