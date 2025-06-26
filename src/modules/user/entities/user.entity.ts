@@ -1,7 +1,9 @@
+import { Favorites } from 'src/modules/favs/entities/fav.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   VersionColumn,
@@ -32,4 +34,7 @@ export class User {
     },
   })
   updatedAt: Date; // timestamp of last update
+
+  @OneToOne(() => Favorites, (user) => user.userId)
+  user: Favorites;
 }

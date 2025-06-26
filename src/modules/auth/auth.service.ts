@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { JwtPayload } from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
+import { Favorites } from '../favs/entities/fav.entity';
 
 const { JWT_SECRET_KEY, JWT_SECRET_REFRESH_KEY, CRYPT_SALT } = process.env;
 
@@ -17,6 +18,8 @@ const { JWT_SECRET_KEY, JWT_SECRET_REFRESH_KEY, CRYPT_SALT } = process.env;
 export class AuthService {
   private cryptoSaltRounds = +CRYPT_SALT;
   constructor(
+    @InjectRepository(Favorites)
+    private readonly favsRep: Repository<Favorites>,
     @InjectRepository(User) private readonly usersRep: Repository<User>,
     private readonly userService: UserService,
     private jwtService: JwtService,
@@ -48,7 +51,12 @@ export class AuthService {
       login: username,
       password: hashedPassword,
     });
-
+    await this.favsRep.save({
+      artists: [],
+      albums: [],
+      tracks: [],
+      userId: newUser.id,
+    });
     return newUser;
   }
 
@@ -80,7 +88,7 @@ export class AuthService {
         },
         {
           secret: JWT_SECRET_KEY,
-          expiresIn: '3m',
+          expiresIn: '1d',
         },
       ),
       this.jwtService.signAsync(
@@ -90,7 +98,7 @@ export class AuthService {
         },
         {
           secret: JWT_SECRET_REFRESH_KEY,
-          expiresIn: '1d',
+          expiresIn: '7d',
         },
       ),
     ]);

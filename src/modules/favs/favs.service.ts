@@ -4,7 +4,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Favorites } from './entities/fav.entity';
-import { idParam } from 'src/modules/_dto/idParam.dto';
+import { favsParams } from 'src/modules/_dto/idParam.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Track } from '../track/entities/track.entity';
@@ -21,21 +21,8 @@ export class FavsService {
     @InjectRepository(Artist) private readonly artistDb: Repository<Artist>,
   ) {}
 
-  async initializeFavorites(): Promise<Favorites> {
-    const count = await this.favsRep.count();
-
-    if (count === 0) {
-      const newFav = this.favsRep.create({
-        artists: [],
-        albums: [],
-        tracks: [],
-      });
-      return this.favsRep.save(newFav);
-    }
-    return this.favsRep.findOne({ where: { id: 1 } });
-  }
-  async findAll() {
-    const getFavs = await this.favsRep.findOne({ where: { id: 1 } });
+  async findAll(userId: string) {
+    const getFavs = await this.favsRep.findOneBy({ userId });
 
     const [artists, albums, tracks] = await Promise.all([
       this.artistDb.findBy({ id: In(getFavs.artists) }),
@@ -45,10 +32,10 @@ export class FavsService {
 
     return { artists, albums, tracks };
   }
-  async addTrack(param: idParam) {
-    const { id } = param;
+  async addTrack(param: favsParams) {
+    const { id, userId } = param;
     const getTrack = await this.trackDb.findOneBy({ id });
-    const getFavs = await this.favsRep.findOneBy({ id: 1 });
+    const getFavs = await this.favsRep.findOneBy({ userId });
 
     if (!getTrack)
       throw new UnprocessableEntityException('Track id doesnt exists');
@@ -57,12 +44,15 @@ export class FavsService {
 
     return isAlreadeInFavs
       ? this.favsRep.save({ ...getFavs, tracks: [...getFavs.tracks] })
-      : this.favsRep.save({ ...getFavs, tracks: [...getFavs.tracks, id] });
+      : this.favsRep.save({
+          ...getFavs,
+          tracks: [...getFavs.tracks, id],
+        });
   }
-  async addAlbum(param: idParam) {
-    const { id } = param;
+  async addAlbum(param: favsParams) {
+    const { id, userId } = param;
     const getAlbum = await this.albumDb.findOneBy({ id });
-    const getFavs = await this.favsRep.findOneBy({ id: 1 });
+    const getFavs = await this.favsRep.findOneBy({ userId });
 
     if (!getAlbum)
       throw new UnprocessableEntityException('Album id doesnt exists');
@@ -71,26 +61,35 @@ export class FavsService {
 
     return isAlreadeInFavs
       ? this.favsRep.save({ ...getFavs, albums: [...getFavs.albums] })
-      : this.favsRep.save({ ...getFavs, albums: [...getFavs.albums, id] });
+      : this.favsRep.save({
+          ...getFavs,
+          albums: [...getFavs.albums, id],
+        });
   }
-  async addArtist(param: idParam) {
-    const { id } = param;
+  async addArtist(param: favsParams) {
+    const { id, userId } = param;
     const getArtist = await this.artistDb.findOneBy({ id });
-    const getFavs = await this.favsRep.findOneBy({ id: 1 });
+    const getFavs = await this.favsRep.findOneBy({ userId });
 
     if (!getArtist)
       throw new UnprocessableEntityException('Artist id doesnt exists');
 
     const isAlreadeInFavs = getFavs.artists.some((el) => el === id);
     return isAlreadeInFavs
-      ? this.favsRep.save({ ...getFavs, artists: [...getFavs.artists] })
-      : this.favsRep.save({ ...getFavs, artists: [...getFavs.artists, id] });
+      ? this.favsRep.save({
+          ...getFavs,
+          artists: [...getFavs.artists],
+        })
+      : this.favsRep.save({
+          ...getFavs,
+          artists: [...getFavs.artists, id],
+        });
   }
 
-  async removeTrack(param: idParam) {
-    const { id } = param;
+  async removeTrack(param: favsParams) {
+    const { id, userId } = param;
     const getTrack = await this.trackDb.findOneBy({ id });
-    const getFavs = await this.favsRep.findOneBy({ id: 1 });
+    const getFavs = await this.favsRep.findOneBy({ userId });
 
     if (!getTrack)
       throw new UnprocessableEntityException('Track id doesnt exists');
@@ -108,10 +107,10 @@ export class FavsService {
 
     return;
   }
-  async removeAlbum(param: idParam) {
-    const { id } = param;
+  async removeAlbum(param: favsParams) {
+    const { id, userId } = param;
     const getAlbum = await this.albumDb.findOneBy({ id });
-    const getFavs = await this.favsRep.findOneBy({ id: 1 });
+    const getFavs = await this.favsRep.findOneBy({ userId });
 
     if (!getAlbum)
       throw new UnprocessableEntityException('Album id doesnt exists');
@@ -128,10 +127,10 @@ export class FavsService {
     return;
   }
 
-  async removeArtist(param: idParam) {
-    const { id } = param;
+  async removeArtist(param: favsParams) {
+    const { id, userId } = param;
     const getArtist = await this.artistDb.findOneBy({ id });
-    const getFavs = await this.favsRep.findOneBy({ id: 1 });
+    const getFavs = await this.favsRep.findOneBy({ userId });
 
     if (!getArtist)
       throw new UnprocessableEntityException('Artist id doesnt exists');
