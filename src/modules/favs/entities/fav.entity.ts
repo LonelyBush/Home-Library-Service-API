@@ -11,6 +11,7 @@ import {
 export class Favorites {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
   @Column('uuid', { array: true, nullable: true, default: null })
   artists: string[];
 

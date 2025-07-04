@@ -1,4 +1,10 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignInUserDto } from './dto/auth-signIn.dto';
 import { Public } from 'src/decoratos/isPublic.decorator';

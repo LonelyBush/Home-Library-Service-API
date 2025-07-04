@@ -88,7 +88,7 @@ export class AuthService {
         },
         {
           secret: JWT_SECRET_KEY,
-          expiresIn: '1d',
+          expiresIn: '1h',
         },
       ),
       this.jwtService.signAsync(
@@ -98,7 +98,7 @@ export class AuthService {
         },
         {
           secret: JWT_SECRET_REFRESH_KEY,
-          expiresIn: '7d',
+          expiresIn: '24h',
         },
       ),
     ]);
