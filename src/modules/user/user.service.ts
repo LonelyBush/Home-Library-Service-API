@@ -23,12 +23,19 @@ export class UserService {
   }
 
   findAll(): Promise<User[]> {
-    return this.usersRep.find();
+    return this.usersRep.find({
+      relations: {
+        favorites: true,
+      },
+    });
   }
 
   async findOne(param: idParam): Promise<User | null> {
     const { id } = param;
-    const getUser = await this.usersRep.findOneBy({ id });
+    const getUser = await this.usersRep.findOne({
+      where: { id },
+      relations: { favorites: true },
+    });
     if (!getUser) throw new NotFoundException('User not found');
     delete getUser.password;
     return getUser;

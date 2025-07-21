@@ -46,17 +46,16 @@ export class AuthService {
     if (getUser)
       throw new ForbiddenException('Too bad ! Such user is already exists !');
     const hashedPassword = await this.hashPassword(password);
-
     const newUser = await this.userService.create({
       login: username,
       password: hashedPassword,
     });
-    await this.favsRep.save({
-      artists: [],
-      albums: [],
-      tracks: [],
-      userId: newUser.id,
-    });
+    const favs = new Favorites();
+    favs.artists = [];
+    favs.albums = [];
+    favs.tracks = [];
+    favs.userId = newUser.id;
+    await this.usersRep.save({ id: newUser.id, favorites: favs });
     return newUser;
   }
 

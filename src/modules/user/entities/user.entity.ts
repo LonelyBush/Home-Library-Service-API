@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -19,22 +20,27 @@ export class User {
   @Column()
   password: string;
   @VersionColumn()
-  version: number; // integer number, increments on update
+  version: number;
   @CreateDateColumn({
     transformer: {
       to: (val: number) => val,
       from: (val: Date) => (val ? val.getTime() : null),
     },
   })
-  createdAt: Date; // timestamp of creation
+  createdAt: Date;
   @UpdateDateColumn({
     transformer: {
       to: (val: number) => val,
       from: (val: Date) => (val ? val.getTime() : null),
     },
   })
-  updatedAt: Date; // timestamp of last update
+  updatedAt: Date;
 
-  @OneToOne(() => Favorites, (user) => user.userId)
-  user: Favorites;
+  @OneToOne(() => Favorites, (favorites) => favorites.user, {
+    cascade: true,
+    eager: true,
+    nullable: true,
+  })
+  @JoinColumn()
+  favorites: Favorites;
 }

@@ -1,11 +1,5 @@
 import { User } from 'src/modules/user/entities/user.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Favorites {
@@ -23,8 +17,6 @@ export class Favorites {
   @Column('uuid')
   userId: string;
 
-  @OneToMany(() => User, (user) => user.user)
-  users: User;
-  @JoinColumn({ name: 'userId' })
+  @OneToOne(() => User, (user) => user.favorites, { onDelete: 'CASCADE' })
   user: User;
 }
